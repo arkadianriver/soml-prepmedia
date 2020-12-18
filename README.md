@@ -42,8 +42,6 @@ Comment (or 'q' to quit)
 => Uncle Joe, Sarah, Dawn, and Dave
 Writing samples\IMAG0101.jpg to samples\picz\20190303_185212_DinnerParty.jpg..
 Writing samples\IMAG0102.jpg to samples\picz\20190303_185248_DinnerParty.jpg..
-
-J:\SavedFiles\_git\soml-prepmedia>
 ```
 
 ## Notes
