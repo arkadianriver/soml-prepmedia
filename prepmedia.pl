@@ -48,17 +48,17 @@ sub processFile;
 # not the best CLI, but meh, it works
 
 my $usage = "usage:\n"
-          . "prepmedia.pl ( -d <dirname> | -f <filename-or-wildcard> | --help | --version )\n"
+          . "prepmedia.pl [ -o ]( -d <dirname> | -f <filename-or-wildcard> )\n"
           . "No spaces in directory or filenames, please. Thanks!";
 sub HELP_MESSAGE() { print $usage ."\n"; }
 sub VERSION_MESSAGE() { print "Version 0.1\n"; }
 $Getopt::Std::STANDARD_HELP_VERSION = 1;
 
 # init
-my %opts = ('d'=>'','f'=>'');
+my %opts = ('d'=>'','f'=>'','o'=>0);
 
 # get cli args
-getopts('d:f:', \%opts);
+getopts('d:f:o', \%opts);
 
 # test validity of args
 if ($opts{'d'} && $opts{'f'}) { print 'Specify either a directory or filename. Not both.';  exit 1; }
@@ -156,7 +156,8 @@ sub uiget
 sub interview
 # the questions (TODO maybe add as optional command line arguments)
 {
-  my $loct = uiget('The DateTime the media was taken as YYYYMMDD_HHMMSS(+|-)ZZZZ', '^\d{8}_\d{6}[\+\-]\d{4}$');
+  my $over = $opts{'o'} ? "\nThis will _override_ EXIF because of -o" : '';
+  my $loct = uiget("The DateTime the media was taken as YYYYMMDD_HHMMSS(+|-)ZZZZ$over", '^\d{8}_\d{6}[\+\-]\d{4}$');
   my $stub = uiget('Descriptive new stubname (or blank to keep the existing basename)', '', BLANK_OK);
   my ($lt, $ln) = split(', ', uiget('Gimme the Lat, Long coordinates', '^\-?\d+?\.\d+?, \-?\d+?\.\d+$'));
   my $confirm = uiget('Wanna add a comment? (y|n)', '[yn]');
@@ -249,10 +250,11 @@ sub processFile
   }
   
   #
-  # 3. If file already has datetime, use that. If not, set it with provided utctime and get new localtime.
-  # 
+  # 3. If file already has datetime, use that (unless override is forced).
+  #    If not, set it with provided utctime and get new localtime.
+  #
 
-  if ($oldinfo->{'DateTimeOriginal'}) {
+  if (!$opts{'o'} && $oldinfo->{'DateTimeOriginal'}) {
     $utctime = $oldinfo->{'DateTimeOriginal'};
     $localtime = convertTime($utctime, $tzone, FROM_UTC);
   } else {
