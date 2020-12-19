@@ -48,7 +48,7 @@ sub processFile;
 # not the best CLI, but meh, it works
 
 my $usage = "usage:\n"
-          . "prepmedia.pl { -d <dirname> | -f <filename-or-wildcard> | --help | --version }\n"
+          . "prepmedia.pl ( -d <dirname> | -f <filename-or-wildcard> | --help | --version )\n"
           . "No spaces in directory or filenames, please. Thanks!";
 sub HELP_MESSAGE() { print $usage ."\n"; }
 sub VERSION_MESSAGE() { print "Version 0.1\n"; }
@@ -156,7 +156,7 @@ sub uiget
 sub interview
 # the questions (TODO maybe add as optional command line arguments)
 {
-  my $loct = uiget('The DateTime the media was taken as YYYYMMDD_HHMMSS-ZZZZ', '^\d{8}_\d{6}[\+\-]\d{4}$');
+  my $loct = uiget('The DateTime the media was taken as YYYYMMDD_HHMMSS(+|-)ZZZZ', '^\d{8}_\d{6}[\+\-]\d{4}$');
   my $stub = uiget('Descriptive new stubname (or blank to keep the existing basename)', '', BLANK_OK);
   my ($lt, $ln) = split(', ', uiget('Gimme the Lat, Long coordinates', '^\-?\d+?\.\d+?, \-?\d+?\.\d+$'));
   my $confirm = uiget('Wanna add a comment? (y|n)', '[yn]');
@@ -289,11 +289,13 @@ sub processFile
   if ($base =~ /^(.*)\.(.*)$/) { $base = $1; $ext = '.'. $2; }
 
   # keep basename if stub not provided in interview
+  # (without the date part if it has it)
+  $base = /^\d{8}_\d{6}[\-_]//;
   $stubname = $base unless $stubname;
 
   # piece back together with increment if already named
   my $allbutext = $path . $localtime .'_'. $stubname;
-  $allbutext .= (-f $allbutext . $ext ? '-'. sprintf('%03d', $i) : ''); 
+  $allbutext .= (-f $allbutext . $ext ? '_'. sprintf('%03d', $i) : ''); 
   my $newfile = $allbutext . $ext;
 
   # further alpha increment the numeric increment if it exists
