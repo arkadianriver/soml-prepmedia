@@ -292,7 +292,7 @@ sub processFile
 
   # keep basename if stub not provided in interview
   # (without the date part if it has it)
-  $base = /^\d{8}_\d{6}[\-_]//;
+  $base =~ s/^\d{8}_\d{6}[\-_]//;
   $stubname = $base unless $stubname;
 
   # piece back together with increment if already named
