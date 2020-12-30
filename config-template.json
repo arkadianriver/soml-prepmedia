@@ -1,0 +1,30 @@
+{
+  "convertcmd": "C:\\Apps\\ImageMagick-7.0.10-Q16-HDRI\\convert.exe",
+  "defaultTimezone": "US/Pacific",
+  "defaultPath": "C:\\Github\\soml-prepmedia\\samples\\pics",
+  "defaultLocation": "Space Needle",
+  "googleMapsAPIKey": "<GOOGLE_MAPS_API_KEY>",
+  "orderedFields": [
+    "Name",
+    "DateTimeOriginal",
+    "EditorDateTime",
+    "ModifyDate",
+    "FileModifyDate",
+    "Title",
+    "Coords",
+    "Path"
+  ],
+  "dateOrderOfPrecedence": [
+    "DateTimeOriginal",
+    "EditorDateTime",
+    "ModifyDate",
+    "FileModifyDate"
+  ],
+  "knownLocations": [
+    {
+      "name": "Space Needle",
+      "lat": "47.620669",
+      "lon": "-122.349250"
+    }
+  ]
+}

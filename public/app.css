@@ -1,0 +1,246 @@
+html {
+  font-family: sans-serif;
+}
+
+body {
+  background: #c0c0c0;
+  font-size: 1.1rem;
+  color:rgba(0, 0, 0, 0.8);
+  overflow-y: hidden;
+}
+
+h1 {
+  font-size: 1.8rem;
+  margin: 1rem 0.5rem;
+}
+
+h2 {
+  font-size: 1.25rem;
+  margin: 0.5rem;
+}
+
+form {
+  height: 860px;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+}
+
+section {
+  margin: 1rem;
+  overflow-y: auto;
+  text-align: left;
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  background: #e0e0e0;
+}
+
+fieldset {
+  margin-top: 10px;
+}
+
+#exifbox {
+  width: 54rem;
+}
+
+#maincanvas {
+  width: 35rem;
+}
+
+header, footer {
+  display: flex;
+  justify-content: space-between;
+  margin: 1rem;
+  text-align: center;
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  background: #c0c0c0;
+}
+
+#filepad {
+  margin-top: 20px;
+  padding: 25px;
+  border: 1px solid black;
+  background: white;
+  text-align: center;
+}
+
+input, select {
+  font-size: 1.2rem;
+  color:rgba(0, 0, 0, 0.8)
+}
+
+input {
+  width: 14em;
+}
+
+input.date-field {
+  width: 10em;
+}
+
+input#filepath {
+  width: 22em;
+}
+
+label {
+  font-weight: bold;
+  white-space: nowrap;
+  padding-right: 6px;
+}
+
+#edits td {
+  vertical-align: top;
+  padding-bottom: 6px;
+}
+
+#controls {
+  margin-top: 20px;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+}
+
+button.bigbutton {
+  font: inherit;
+  font-weight: bold;
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  margin: 0.5rem;
+}
+
+button#swizzle {
+  background: #1cbd82;
+  border-color: #1cbd82;
+  border: 1px solid #1cbd82;
+}
+button#swizzle:focus {
+  outline: none;
+}
+button#swizzle:hover,
+button#swizzle:active {
+  background: #a927f5;
+  border-color: #a927f5;
+}
+
+button#submit {
+  background: #ff0062;
+  border-color: #ff0062;
+  border: 1px solid #ff0062;
+}
+button#submit:focus {
+  outline: none;
+}
+button#submit:hover,
+button#submit:active {
+  background: #a927f5;
+  border-color: #a927f5;
+}
+
+button#usedefault {
+  height: 28px;
+  font-size: 12px;
+  font-weight: bold;
+  vertical-align: top;
+}
+
+#exiflist {
+  height: 680px;
+  overflow: auto;
+}
+
+#exiflist > li, #filelist > li{
+  list-style-type: none;
+  margin-left: -2.0rem;
+  padding: 3px 9px 3px 9px;
+  display: flex;
+}
+
+.thumb {
+  width: 140px;
+  height: 140px;
+  margin-right: 10px;
+  text-align: right;
+}
+
+.exif-table {
+  table-layout: fixed;
+  border: solid 2px black;
+  border-collapse: collapse;
+  margin-bottom: 9px;
+}
+
+.exif-table td {
+  border: solid 1px black;
+  padding: 3px 3px 3px 6px;
+  vertical-align: top;
+}
+.exif-table td div {
+  border: none;
+}
+
+.exif-table td label {
+  font-weight: normal;
+}
+
+.exif-table tbody td:nth-child(2) {
+  max-width: 320px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.datecell {
+  display: flex;
+  justify-content: space-between;
+}
+
+.datecell > div {
+  font-family: monospace;
+  font-size: 1.4rem;
+}
+
+.exif-item input[type="radio"] {
+  width: 20px;
+}
+
+.exif-item button {
+  width: 60px;
+  margin-right: 5px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.exif-item input[type="checkbox"] {
+  margin: 0px 10px 0px 0px;
+  width: 20px;
+  height: 20px;
+}
+
+.exif-item input[type="checkbox"]:not(:checked) ~ *,
+.exif-item input[type="checkbox"]:not(:checked) ~ * *
+ {
+  background-color: #e0e0e0;
+  filter: opacity(0.67);
+}
+
+.modified {
+  border-color: blue;
+  border-width: 3px;
+  background-color: rgb(240, 232, 254);
+}
+
+#dataDialog {
+  width: 67%;
+  height: 67%;
+}
+#dataField {
+  height: 90%;
+  overflow: auto;
+}
+#dataDialog form {
+  vertical-align: bottom;
+}

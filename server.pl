@@ -1,0 +1,243 @@
+#!/usr/local/bin/perl
+#
+# Sets metadata about media (movie, pic) files, by using Exiftool.
+# (Actually, exiftool works on all kinds of files, but media is what I'm interested in.)
+#
+# NOTES:
+#
+# Had what I thought were multithreading issues with HTTP::Daemon module,
+# discovered many other web servers, and decided on Mojolicious
+# because of how clean and easy it is to implement.
+# Mojo is MVC, but using MV only (view in __DATA__ at bottom)
+# with only one view variable (config) for the client to access.
+#
+# Couldn't get Perlmagick modules installed,
+# so thumbnails are generated with the CLI of Imagemagick.
+#
+# Although client-server, intended as local app only; otherwise
+# token is exposed without SSL.
+
+use strict;
+use warnings;
+use utf8;
+use feature ':5.16';
+
+my $debug = 1;
+
+use File::Copy;
+use File::Basename;
+use Data::Dumper;
+#use JSON;
+use Image::ExifTool qw( :Public );
+use MIME::Base64;
+use Mojolicious::Lite -signatures;
+
+
+# ---------------------------------------------------
+# get config for Perl _and_ JS app (embedded in HTML)
+# ---------------------------------------------------
+
+my $config_json = '';
+open F, "config.json" or die "Cannot open config. $!";
+{
+  local $/ = undef;
+  $config_json = <F>;
+  $config_json =~ s/\s+/ /g;
+}
+close F;
+#my $config = decode_json $config_json;
+my $config = plugin JSONConfig => { file => 'config.json' };
+
+
+# ----------
+# web server
+# ----------
+
+# don't cache static files (css, js, images) -- particularly during development, sheesh
+
+plugin 'StaticCache' => { cache_control => 'no-cache', max_age => 0 };
+push @{app->static->paths}, 'public';
+
+# routes (API)
+
+get '/' => sub ($c) {
+  # main app
+  # (adds config as JSON to the HTML page for access by client)
+  $c->stash(config_json => $config_json);
+  $c->render(template => 'index');
+};
+
+post '/getexif' => sub ($c) {
+  # return the EXIF data for provided array of files
+  # (note how requests want references, not arrays)
+  my $filesref = $c->req->json;
+  my $exifref = getExifInfo($filesref);
+  $c->render(json => $exifref);
+};
+
+post '/fileexist' => sub ($c) {
+  # file exist test to see if client has the right path
+  # (using plain text body to avoid JSON backslashes and dereferencing)
+  my $fullpath = $c->req->body;
+  my $json = ( -f $fullpath ? 1 : 0 );
+  $c->render(json => $json);
+};
+
+post '/changefiles' => sub ($c) {
+  # TODO write EXIF and rename files from client's JSON data
+  my $dataref = $c->req->json;
+  print Dumper $dataref;
+};
+
+# launch
+
+app->start('threaded', '-l', 'http://localhost:8989');
+
+
+# ---------------
+# sub definitions
+# ---------------
+
+sub getFileParts
+{
+  my ($fullname) = @_;
+  my ($base, $path) = fileparse($fullname);
+  my $ext = '';
+  if ($base =~ /^(.*)\.(.*)$/) { $base = $1; $ext = '.'. $2; }
+  return ($path, $base, $ext);
+}
+
+sub getThumb64
+{
+  my ($f) = @_;
+
+  my $cmd = $config->{'convertcmd'};
+
+  my $ext = ''; if ($f =~ /\.(.*)$/) { $ext = $1; }
+  $f .= ($f =~ /\.(?:i)(bmp|jpg|jpeg|png|gif|tiff?)$/ ? '' : '[10]');
+
+  my $f64 = '';
+  if (open(FILE, qq("$cmd" "$f" -resize 140x140 jpeg:- |))) {
+    binmode(FILE);
+    {
+      local $/ = undef;
+      $f64 .= encode_base64(<FILE>, '');
+    }
+    close FILE;
+    #print $f64;
+  } else {
+    warn "Couldn't convert $f.\n$!";
+  }
+  return qq(data:image/jpeg;base64,).$f64;
+}
+
+sub getExifInfo
+{
+  my ($filesref) = @_;
+
+  my @exif = ();
+  # array, not arrayref, because perl warning "push to reference is experimental",
+  # and writing "$exif->[++$#{$exif}] = $i" is nuts ...
+  for (@{$filesref}) {
+    my $eto = new Image::ExifTool;
+    $eto->Options(CoordFormat => '%+.6f');
+    my $info = $eto->ImageInfo($_);
+    my $img64 = getThumb64($_);
+    my ($path, $base, $ext) = getFileParts($_);
+    my $i = {};
+    $i->{'thumb'} = $img64;
+    $i->{'Name'} = ${base}.$ext;
+    $i->{'Title'} = $info->{'Title'} ? $info->{'Title'} : '';
+    $i->{'DateTimeOriginal'} = $info->{'DateTimeOriginal'} ? $info->{'DateTimeOriginal'} : '';
+    $i->{'ModifyDate'} = $info->{'ModifyDate'} ? $info->{'ModifyDate'} : '';
+    $i->{'FileModifyDate'} = $info->{'FileModifyDate'} ? $info->{'FileModifyDate'} : '';
+    $i->{'Coords'} = $info->{'GPSLatitude'}
+                   ? $info->{'GPSLatitude'} .','. $info->{'GPSLongitude'}
+                   : '';
+    push @exif, $i;
+  }
+  return \@exif; # ... although HTTP request wants a reference
+}
+
+
+__DATA__
+@@ index.html.ep
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prep Media</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.32/moment-timezone-with-data.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="app.css">
+    <script id="config" type="application/json"><%== $config_json %></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <div><b>soml-prepmedia</b></div>
+    </header>
+    <main>
+    <form id="mainform" autocomplete="on"
+          action="javascript:void(0);"
+          enctype="application/json">
+      <section id="exifbox">
+        <h2>3. Tweak EXIF data</h2>
+        <ul id="exiflist"><li>No files yet looked up.</li></ul>
+      </section>
+      <section id="maincanvas">
+        <h2>1. Prepare files</h2>
+        <fieldset><legend>Replacement values</legend>
+          <table id="edits">
+            <tr>
+              <td><label for="imgStub">Stub name</label></td>
+              <td><input id="imgStub" name="imgStub" /></td>
+            </tr>
+            <tr>
+              <td><label for="imgTitle">Short title</label></td>
+              <td><input id="imgTitle" name="imgTitle" /></td>
+            </tr>
+            <tr>
+              <td><label for="imgDatetime">DateTime</label></td>
+              <td><input class="date-field" id="imgDatetime" name="imgDatetime" placeholder="Click to select" /><br/>
+                  <select id="imgTimezone"></select></td>
+            </tr>
+            <tr>
+              <td><label for="imgLocation">Location</label></td>
+              <td><select id="imgLocation" name="imgLocation"></select><br/>
+                  <input id="newLocation" name="newLocation" placeholder="Latitude,Longitude" /></td>
+            </tr>
+          </table>
+          <input id="editorDatetime" name="editorDatetime" type="hidden" value="" />
+        </fieldset>
+        <fieldset><legend>Files</legend>
+          <input id="filepath" name="filepath" placeholder="Paste the file path here before dragging."/>
+          <button id="usedefault" type="button">Use default</button>
+          <div id="filepad">DROP FILES HERE FROM FINDER OR EXPLORER</div>
+        </fieldset>
+        <div id="controls">
+          <button class="bigbutton" id="swizzle" type="button">2. Apply</button>
+          <button class="bigbutton" id="submit" type="button">4. Submit</button>
+        </div>
+      </section>
+    </form>
+    </main>
+    <footer>
+      <div>Organizing SOML media with ease</div>
+      <div>Oy!</div>
+    </footer>
+    <dialog id="dataDialog">
+      <pre id="dataField"></pre>
+      <form method="dialog">
+        <menu>
+          <button value="cancel">Cancel</button>
+          <button id="confirmBtn" value="default">Confirm and write to files</button>
+        </menu>
+      </form>
+    </dialog>
+  </body>
+</html>
