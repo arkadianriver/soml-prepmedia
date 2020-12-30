@@ -5,6 +5,8 @@
 Sets metadata about media (movie, pic) files, by using [Exiftool](https://exiftool.org).
 (Actually, exiftool works on all kinds of files, but media is what I'm interested in.)
 
+![web app ui](readme.png)
+
 ## Purpose
 
 To be used for cataloging Story of My Life (soml) media.
