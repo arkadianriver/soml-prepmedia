@@ -1,3 +1,5 @@
+[![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
+
 # soml-prepmedia
 
 Sets metadata about media (movie, pic) files, by using [Exiftool](https://exiftool.org).
@@ -39,6 +41,14 @@ web app instead.
 Currently reads, displays, and allows edits to data.
 One final edit of the filename with date and we can send to the perl server to do its thing.
 
+**Dependencies:**
+
+- Perl modules: Image::ExifTool, MIME::Base64, Mojolicious (I used `cpan install Mojolicious`)
+- ImageMagick CLI
+- Some CDN pulls: flatpickr, momentjs, moment-timezone, axios
+
+**Procedure:**
+
 1. Run `server.pl` and open `http://localhost:8989` in a browser.
    Also open a file explorer conveniently next to the app.
    Size the browser so there's plenty of room in the EXIF data area.
@@ -68,6 +78,12 @@ One final edit of the filename with date and we can send to the perl server to d
    (and keep tweaking or whatever).
 
 ### Old CLI
+
+**Dependencies:**
+
+- Perl modules: Image::ExifTool, File::DosGlob (if Windows), File::Glob
+
+**Procedure:**
 
 ```
 cli-prepmedia.pl [ -o ]( -d <dirname> | -f <filename-or-wildcard> )
