@@ -442,7 +442,7 @@ function _getUTC(localwithzone) {
  * @param {String} id - list item identifier
  */
 function _getSelectedDate(id) {
-  const dateAsExif = mainForm.elements[`${id}_dates`].value;
+  const dateAsExif = mainForm.elements[`${id}_dates`].value.substring(0, 19);
   return dateAsExif
        ? moment(dateAsExif, "YYYY:MM:DD HH:mm:SS").format("YYYYMMDD_HHmmSS")
        : '';
@@ -464,6 +464,20 @@ function _getNewStubPlusExt(fieldVal) {
                   ? fieldVal.substring(16, fieldVal.length - extVal.length)
                   : fieldVal.substring(0, fieldVal.length - extVal.length);
   return imgStub.value ? `${imgStub.value}${extVal}` : `${givenStub}${extVal}`;
+}
+
+/**
+ * Constructs a name from the selected date and stub
+ * 
+ * @param {String} fieldId Id of the input field
+ * @param {DOMInput} field the 'Name' input field
+ */
+function _replaceName(fieldId, field) {
+  const dateVal = _getSelectedDate(fieldId, 'fileformat');
+  if (!dateVal) {
+    return 'NO-DATE-SELECTED';
+  }
+  return `${dateVal}_${_getNewStubPlusExt(field.value)}`;
 }
 
 /**
@@ -569,14 +583,7 @@ function initExifListControls() {
       const fieldParts = btn.id.split('_'); // e.g. btnapply_item-3_Name
       switch (fieldParts[2]) {
         case 'Name':
-          const dateVal = _getSelectedDate(fieldParts[1], 'fileformat');
-          if (!dateVal) {
-            // TODO - find a way to alert user of stuff while within handlers,
-            // which throw violations because alerts "block" and thus take too long
-            alert('You need to provide a value for the date.');
-            return;
-          }
-          field.value = `${dateVal}_${_getNewStubPlusExt(field.value)}`;
+          field.value = _replaceName(fieldParts[1], field);
           break;
         case 'Title':
           field.value = imgTitle.value;
@@ -652,14 +659,11 @@ function applyReplacements() {
         const td = li.querySelector(`#${li.id}_eDateVal`);
         td.textContent = entry[1];
       }
-      // TODO-FIXME next:
-      // File rename, taking into account new date, stub, and possibly do 
-      // duplicate checking (among this set of files) here in the client
-      // in addition to on the server. Maybe not, though, since it has to
-      // be done on the server for sure, since it has access to all the
-      // files in the path.
-      _indicateIfModified(inputField);  
+      _indicateIfModified(inputField);
     });
+    nameField = li.querySelector(`#${li.id}_Name`);
+    nameField.value = _replaceName(li.id, nameField);
+  _indicateIfModified(nameField);
   });
 }
 
@@ -697,6 +701,7 @@ function onSubmit(event) {
         const i = parseInt(kv[0].substr(5), 10);
         if (!data[i]) data[i] = {};
         data[i][kv[1]] = elem.value;
+        if (kv[1] == 'Name') data[i]['Oldname'] = elem.title;
       }
     }
   });
