@@ -84,9 +84,10 @@ post '/fileexist' => sub ($c) {
 };
 
 post '/changefiles' => sub ($c) {
-  # TODO write EXIF and rename files from client's JSON data
+  # write EXIF and rename files from client's JSON data
   my $dataref = $c->req->json;
-  print Dumper $dataref;
+  my $respref = changeFiles($dataref);
+  $c->render(json => $respref);
 };
 
 # launch
@@ -159,6 +160,104 @@ sub getExifInfo
   return \@exif; # ... although HTTP request wants a reference
 }
 
+sub changeFiles
+{
+  my ($dataref) = @_;
+
+  my $respdata = { 'msg' => '', 'data' => [] };
+
+  my $path = $dataref->{'path'};
+  if ($path) {
+    $path =~ s/\\+/\//g;
+  } else {
+    $respdata->{'msg'} = 'path variable not defined.';
+    return $respdata;
+  }
+  
+  # make existing file hash (filebase + highest-increment)
+  # 1. collect all files
+  my @existarry = [];
+  if ( ! opendir D, $path) {
+    $respdata->{'msg'} = 'Could not open path '. $path;
+    return $respdata;
+  } else {
+    @existarry = grep { /^\d{8}_\d{6}_/ } readdir D;
+    close D;
+  }
+  # 2. Loop through files to associate stub names with highest increment
+  #    e.g. {'19710901_200000_DelValle'=>12,'19710901_200000_Bergstrom'=>24}
+  my $existings = {};
+  for (@existarry) {
+    my ($p, $base, $ext) = getFileParts($_);
+    my ($dt, $tm, $stub, $incr) = split('_', $base);
+    my $fullbase = "${dt}_${tm}_${stub}";
+    if ( ! defined $existings->{$fullbase} ) {
+      $existings->{$fullbase} = { 'incr' => 0, 'ext' => $ext };
+    } else {
+      my $prevmax = $existings->{$fullbase}->{'incr'};
+      $incr = $incr ? $incr : 0; # satisfies strict in following comparison and addition
+      $existings->{$fullbase}->{'incr'} = $incr+0 > $prevmax ? $incr+0 : $prevmax; # add 0 just 'cuz I prefer to store as int
+    }
+  }
+
+  # collect files to work on into a hash, indexed by basename
+  my $toRn = {};
+  for (@{$dataref->{'media'}}) {
+    my ($p, $base, $ext) = getFileParts($_->{'Name'});
+    if ( ! $toRn->{$base} ) { $toRn->{$base} = []; }
+    $_->{'ext'} = $ext;
+    push(@{$toRn->{$base}}, $_);
+  }
+  
+  # Change exiftool info and rename files (to next highest increment if file already exists)
+  # and collect results to return to client
+  foreach my $key (sort keys %{$toRn}) {
+    
+    for(my $i=0; $i <= $#{$toRn->{$key}}; ++$i) {
+
+      # new exiftool info
+      my $eto = new Image::ExifTool;
+      $eto->SetNewValue('DateTimeOriginal', $toRn->{$key}->[$i]->{'dates'});
+      $eto->SetNewValue('CreateDate', $toRn->{$key}->[$i]->{'dates'});
+      $eto->SetNewValue('ModifyDate', $toRn->{$key}->[$i]->{'dates'});
+      my ($lat,$lon) = split(',', $toRn->{$key}->[$i]->{'Coords'});
+      my $latref = $lat > 0 ? 'N' : 'S';
+      my $lonref = $lon > 0 ? 'E' : 'W';
+      $eto->SetNewValue('GPSLatitude', $lat);
+      $eto->SetNewValue('GPSLongitude', $lon);
+      $eto->SetNewValue('GPSLatitudeRef', $latref);
+      $eto->SetNewValue('GPSLongitudeRef', $lonref);
+      $eto->SetNewValue('Title', $toRn->{$key}->[$i]->{'Title'});
+      
+      # determine new filename to use
+      my $newfile = '';
+      my $ext = $toRn->{$key}->[$i]->{'ext'};
+      my $ival = defined $existings->{$key}
+               ? sprintf('%04d', $existings->{$key}->{'incr'} + $i + 1)
+               : sprintf('%04d', $i); 
+      my $newbase = "${path}/${key}_${ival}";
+      $newfile = "${newbase}${ext}";
+      for my $alph ('a' .. 'z') { # just in case - shouldn't happen
+        last if ! -f $newfile;
+        $newfile = $newbase . $alph . $ext;
+      }
+
+      # write new file
+      my $oldfile = $path .'/'. $toRn->{$key}->[$i]->{'Oldname'};
+      print "Writing ${oldfile} to ${newfile}..\n";
+      if (move($oldfile, $newfile)) {
+        $eto->WriteInfo($newfile);
+        push(@{$respdata->{'data'}}, "Wrote $newfile");
+      } else {
+        warn "Cannot rename file to $newfile\n";
+        push(@{$respdata->{'data'}}, "Problem writing $newfile");
+        $respdata->{'msg'} = 'Problem writing at least one file';
+      }
+    }
+  }
+  $respdata->{'msg'} = 'Files written' unless $respdata->{'msg'};
+  return $respdata;
+}
 
 __DATA__
 @@ index.html.ep

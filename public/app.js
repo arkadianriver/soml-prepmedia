@@ -708,10 +708,27 @@ function onSubmit(event) {
 
   // Display dataField JSON content in <pre> for confirmation.
   // TODO - Is this really necessary? Might slow down the workflow; we'll see.
-  dataField.textContent = JSON.stringify(data.filter( e => e.enable ), null, 2);
+  constoutdata = {
+    path: filePath,
+    media: data.filter( e => e.enable )
+  }
+  dataField.textContent = JSON.stringify(constoutdata, null, 2);
   dataDialog.showModal();
 }
 
+async function onConfirm(event) {
+  event.preventDefault();
+  const data = dataField.textContent;
+  dataField.textContent = 'By your command. Please stand by ...'; // FIXME to image
+  const respdata = await axios.post('http://localhost:8989/changefiles', data)
+  .then(function (response) {
+    return response.data;
+  })
+  .catch(function (error) {
+    console.log(error);
+  });
+  dataField.textContent = JSON.stringify(respdata, null, 2);
+}
 
 /*
 
@@ -759,6 +776,9 @@ swizzle.addEventListener('click', applyReplacements);
 
 // Submit button
 submitBtn.addEventListener('click', onSubmit);
+
+// Confirm button
+confirmBtn.addEventListener('click', onConfirm);
 
 // Initialize date and location fields after the app is first loaded
 window.addEventListener('load', function() {
