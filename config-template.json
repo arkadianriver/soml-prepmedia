@@ -12,6 +12,8 @@
     "FileModifyDate",
     "Title",
     "Coords",
+    "GPSDateStamp",
+    "GPSTimeStamp",
     "Path"
   ],
   "dateOrderOfPrecedence": [
