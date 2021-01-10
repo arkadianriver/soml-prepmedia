@@ -24,4 +24,4 @@
 ✔ Video: find what Windows reads for MediaCreated date for video: @done(21-01-10 01:41)
   - Seems CreateDate is UTC for vidz, local for picz?
 ✔ bug: fileStub to exclude img increment number @done(21-01-10 01:40)
-☐ disable confirm button after submitted; add window close ([x]) button
+✔ disable confirm button after submitted; add window close ([x]) button @done(21-01-10 02:19)

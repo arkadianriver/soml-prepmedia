@@ -361,6 +361,7 @@ __DATA__
     <dialog id="dataDialog">
       <pre id="dataField"></pre>
       <form method="dialog">
+        <button id="dialogClose">&#x274E;</button>
         <menu>
           <button value="cancel">Cancel</button>
           <button id="confirmBtn" value="default">Confirm and write to files</button>

@@ -728,6 +728,7 @@ async function onConfirm(event) {
   event.preventDefault();
   const data = dataField.textContent;
   dataField.textContent = 'By your command. Please stand by ...'; // FIXME to image
+  confirmBtn.disabled = true;
   const respdata = await axios.post('http://localhost:8989/changefiles', data)
   .then(function (response) {
     return response.data;
