@@ -21,3 +21,7 @@
   - ~..displayed as exifList all grayed out unchecked?~
   - send only response message as okay or error ~and if all okay, clear the exifList?~
 ☐ Possibly reconsider writing default replacements to config depending on workflow.
+✔ Video: find what Windows reads for MediaCreated date for video: @done(21-01-10 01:41)
+  - Seems CreateDate is UTC for vidz, local for picz?
+✔ bug: fileStub to exclude img increment number @done(21-01-10 01:40)
+☐ disable confirm button after submitted; add window close ([x]) button

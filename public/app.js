@@ -470,9 +470,11 @@ function _getSelectedDate(id) {
 function _getNewStubPlusExt(fieldVal) {
   const extArr = fieldVal.match(/\.[0-9a-z]+$/i);
   const extVal = extArr ? extArr[0].toLowerCase() : '';
-  const givenStub = fieldVal.match(/^\d{8}_\d{6}/)
+  let givenStub = fieldVal.match(/^\d{8}_\d{6}/)
                   ? fieldVal.substring(16, fieldVal.length - extVal.length)
                   : fieldVal.substring(0, fieldVal.length - extVal.length);
+  if ('_' == givenStub.substr(givenStub.length - 5, 1)) // remove numeric incr if present
+    givenStub = givenStub.substring(0, givenStub.length - 5);
   return imgStub.value
        ? `${imgStub.value.replace(/[^\w]/g,'-')}${extVal}`
        : `${givenStub.replace(/[^\w]/g,'-')}${extVal}`;

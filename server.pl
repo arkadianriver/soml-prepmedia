@@ -29,6 +29,7 @@ use File::Basename;
 use Image::ExifTool qw( :Public );
 use MIME::Base64;
 use Mojolicious::Lite -signatures;
+use DateTime::TimeZone;
 
 
 # ---------------------------------------------------
@@ -61,6 +62,7 @@ get '/' => sub ($c) {
   # main app
   # (adds config as JSON to the HTML page for access by client)
   $c->stash(config_json => $config_json);
+  $c->stash(timezone => DateTime::TimeZone->new( name => 'local' )->name());
   $c->render(template => 'index');
 };
 
@@ -191,7 +193,8 @@ sub changeFiles
     my ($dt, $tm, $stub, $incr) = split('_', $base);
     my $fullbase = "${dt}_${tm}_${stub}";
     if ( ! defined $existings->{$fullbase} ) {
-      $existings->{$fullbase} = { 'incr' => 0, 'ext' => $ext };
+      my $ival = $incr ? $incr+0 : 0;
+      $existings->{$fullbase} = { 'incr' => $ival, 'ext' => $ext };
     } else {
       my $prevmax = $existings->{$fullbase}->{'incr'};
       $incr = $incr ? $incr : 0; # satisfies strict in following comparison and addition
@@ -202,10 +205,12 @@ sub changeFiles
   # collect files to work on into a hash, indexed by basename
   my $toRn = {};
   for (@{$dataref->{'media'}}) {
-    my ($p, $base, $ext) = getFileParts($_->{'Name'});
-    if ( ! $toRn->{$base} ) { $toRn->{$base} = []; }
-    $_->{'ext'} = $ext;
-    push(@{$toRn->{$base}}, $_);
+    if ($_->{'Name'}) {
+      my ($p, $base, $ext) = getFileParts($_->{'Name'});
+      if ( ! $toRn->{$base} ) { $toRn->{$base} = []; }
+      $_->{'ext'} = $ext;
+      push(@{$toRn->{$base}}, $_);
+    }
   }
   
   # Change exiftool info and rename files (to next highest increment if file already exists)
@@ -214,19 +219,37 @@ sub changeFiles
     
     for(my $i=0; $i <= $#{$toRn->{$key}}; ++$i) {
 
-      # new exiftool info
+      # new exiftool info, if provided
       my $eto = new Image::ExifTool;
-      $eto->SetNewValue('DateTimeOriginal', $toRn->{$key}->[$i]->{'dates'});
-      $eto->SetNewValue('CreateDate', $toRn->{$key}->[$i]->{'dates'});
-      $eto->SetNewValue('ModifyDate', $toRn->{$key}->[$i]->{'dates'});
-      my ($lat,$lon) = split(',', $toRn->{$key}->[$i]->{'Coords'});
-      my $latref = $lat > 0 ? 'N' : 'S';
-      my $lonref = $lon > 0 ? 'E' : 'W';
-      $eto->SetNewValue('GPSLatitude', $lat);
-      $eto->SetNewValue('GPSLongitude', $lon);
-      $eto->SetNewValue('GPSLatitudeRef', $latref);
-      $eto->SetNewValue('GPSLongitudeRef', $lonref);
-      $eto->SetNewValue('Title', $toRn->{$key}->[$i]->{'Title'});
+      if ($toRn->{$key}->[$i]->{'dates'}) {
+        $eto->SetNewValue('DateTimeOriginal', $toRn->{$key}->[$i]->{'dates'});
+        $eto->SetNewValue('CreateDate', $toRn->{$key}->[$i]->{'dates'});
+        $eto->SetNewValue('ModifyDate', $toRn->{$key}->[$i]->{'dates'});
+      }
+      if ($toRn->{$key}->[$i]->{'Coords'}) {
+        my ($lat,$lon) = split(',', $toRn->{$key}->[$i]->{'Coords'});
+        my $latref = $lat > 0 ? 'N' : 'S';
+        my $lonref = $lon > 0 ? 'E' : 'W';
+        $eto->SetNewValue('GPSLatitude', $lat);
+        $eto->SetNewValue('GPSLongitude', $lon);
+        $eto->SetNewValue('GPSLatitudeRef', $latref);
+        $eto->SetNewValue('GPSLongitudeRef', $lonref);
+      }
+      if ($toRn->{$key}->[$i]->{'GPSDateStamp'} && $toRn->{$key}->[$i]->{'GPSTimeStamp'}) {
+        my $utcstamp = $toRn->{$key}->[$i]->{'GPSDateStamp'}
+                     . ' '
+                     . $toRn->{$key}->[$i]->{'GPSTimeStamp'}
+                     . 'Z';
+        $eto->SetNewValue('GPSDateStamp', $toRn->{$key}->[$i]->{'GPSDateStamp'});
+        $eto->SetNewValue('GPSTimeStamp', $toRn->{$key}->[$i]->{'GPSTimeStamp'});
+        if ($toRn->{$key}->[$i]->{'ext'} =~ /\.?(?:mp4|avi|mpg|m4v|mov|mpeg|flv)/) {
+          $eto->SetNewValue('CreateDate', $utcstamp);
+          $eto->SetNewValue('MediaCreateDate', $utcstamp);
+        }
+      }
+      if ($toRn->{$key}->[$i]->{'Title'}) {
+        $eto->SetNewValue('Title', $toRn->{$key}->[$i]->{'Title'});
+      }
       
       # determine new filename to use
       my $newfile = '';
@@ -302,13 +325,18 @@ __DATA__
             <tr>
               <td><label for="imgDatetime">DateTime</label></td>
               <td><input class="date-field" id="imgDatetime" name="imgDatetime"
-                   autocomplete="off" placeholder="Click to select" /><br/>
-                  <input type="text" name="imgTimezone" list="imgTimezone"/>
+                   autocomplete="off" placeholder="Click to select or type" /></td>
+            </tr>
+            <tr>
+              <td><label for="imgTimezone">Timezone</label></td>
+              <td><input type="text" name="imgTimezone" list="imgTimezone"
+                   value="<%== $timezone %>"/>
                   <datalist id="imgTimezone"></datalist></td>
             </tr>
             <tr>
               <td><label for="imgLocation">Location</label></td>
-              <td><input type="text" autocomplete="off" name="imgLocation" list="imgLocation"/>
+              <td><input type="text" autocomplete="off" name="imgLocation"
+                   list="imgLocation" placeholder="Click to select or type"/>
                   <datalist id="imgLocation"></datalist></td>
             </tr>
           </table>
