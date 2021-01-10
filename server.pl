@@ -152,6 +152,8 @@ sub getExifInfo
     $i->{'DateTimeOriginal'} = $info->{'DateTimeOriginal'} ? $info->{'DateTimeOriginal'} : '';
     $i->{'ModifyDate'} = $info->{'ModifyDate'} ? $info->{'ModifyDate'} : '';
     $i->{'FileModifyDate'} = $info->{'FileModifyDate'} ? $info->{'FileModifyDate'} : '';
+    $i->{'GPSDateStamp'} = $info->{'GPSDateStamp'} ? $info->{'GPSDateStamp'} : '';
+    $i->{'GPSTimeStamp'} = $info->{'GPSTimeStamp'} ? $info->{'GPSTimeStamp'} : '';
     $i->{'Coords'} = $info->{'GPSLatitude'}
                    ? $info->{'GPSLatitude'} .','. $info->{'GPSLongitude'}
                    : '';
@@ -302,13 +304,15 @@ __DATA__
             </tr>
             <tr>
               <td><label for="imgDatetime">DateTime</label></td>
-              <td><input class="date-field" id="imgDatetime" name="imgDatetime" placeholder="Click to select" /><br/>
-                  <select id="imgTimezone"></select></td>
+              <td><input class="date-field" id="imgDatetime" name="imgDatetime"
+                   autocomplete="off" placeholder="Click to select" /><br/>
+                  <input type="text" name="imgTimezone" list="imgTimezone"/>
+                  <datalist id="imgTimezone"></datalist></td>
             </tr>
             <tr>
               <td><label for="imgLocation">Location</label></td>
-              <td><select id="imgLocation" name="imgLocation"></select><br/>
-                  <input id="newLocation" name="newLocation" placeholder="Latitude,Longitude" /></td>
+              <td><input type="text" autocomplete="off" name="imgLocation" list="imgLocation"/>
+                  <datalist id="imgLocation"></datalist></td>
             </tr>
           </table>
           <input id="editorDatetime" name="editorDatetime" type="hidden" value="" />

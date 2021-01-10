@@ -25,6 +25,10 @@ MM.    `7MMF' MM 8M     M8 MM     M8  ,pm9MM    MM  `YMMMa.
 */
 
 const mainForm = document.getElementById('mainform');
+const formTimezone = mainForm.elements['imgTimezone'];
+const formLocation = mainForm.elements['imgLocation'];
+const imgTimezone = document.getElementById('imgTimezone');
+const imgLocation = document.getElementById('imgLocation');
 const swizzleBtn = document.getElementById('swizzle');
 const submitBtn = document.getElementById('submit');
 const dataDialog = document.getElementById('dataDialog');
@@ -34,9 +38,7 @@ const defPathBtn = document.getElementById('usedefault');
 const imgDatetime = document.getElementById('imgDatetime');
 const imgStub = document.getElementById('imgStub');
 const imgTitle = document.getElementById('imgTitle');
-const imgTimezone = document.getElementById('imgTimezone');
 const editorDatetime = document.getElementById('editorDatetime');
-const imgLocation = document.getElementById('imgLocation');
 const fileChooser = document.getElementById('filechooser');
 const exifList = document.getElementById("exiflist");
 const filePad = document.getElementById("filepad");
@@ -52,6 +54,7 @@ const config = JSON.parse(document.getElementById('config').text);
 const fp = flatpickr(imgDatetime, {
   enableTime: true,
   dateFormat: 'Y:m:d H:i:S',
+  allowInput: true,
   enableSeconds: true,
   time_24hr: true
 });
@@ -99,7 +102,7 @@ function timezoneSelect() {
   zones.sort().forEach(z => {
     const opt = document.createElement("option");
     const off_name = z.split(' ');
-    opt.value = off_name[0];
+    opt.value = off_name[1];
     opt.appendChild(document.createTextNode(z));
     if (off_name[1] === config.defaultTimezone) opt.selected = true;
     imgTimezone.appendChild(opt);    
@@ -115,7 +118,7 @@ function locationSelect() {
     const opt = document.createElement("option");
     opt.value = `${loc.lat},${loc.lon}`;
     opt.appendChild(document.createTextNode(loc.name));
-    if (loc === config.defaultLocation) opt.selected = true;
+    if (loc.name === config.defaultLocation) imgLocation.placeholder = loc.name;
     imgLocation.appendChild(opt);    
   });
 }
@@ -195,15 +198,12 @@ async function makeExifDOM(flist) {
     config.orderedFields.forEach( k => {
 
       const v = k === 'FileModifyDate'
-              ? _getUTC(entry[k]) // strip off local time offset that is put here somehow ***
+              ? _getUTC(entry[k])
               : k === 'Path'
               ? filePath          // add in the path from the field
               : entry[k];
       
-      // *** TODO:
-      //   Need to figure out timezone handling logic among Windows, EXIFTool, Galaxy phone
-      //   to change this to be handled appropriately.
-      // TODO 2:
+      // TODO:
       //   All this node creating, appending, and setting is tiresome.
       //   (Only halfway through Max's course, maybe there's a better way)
       //   Would seem funny to add so many effiencies in ECMA-6 without touching the DOM.
@@ -211,7 +211,7 @@ async function makeExifDOM(flist) {
       const tr = document.createElement("tr");
 
       // Date values are special (use radio buttons to select)
-      if (k.match(/Date/)) {
+      if (k.match(/Date/) && !k.match(/DateS/)) { // TODO: find a single regex for these (/Date[^S]?/ doesn't work)
         const tk = document.createElement("td");
         // key
         const tkl = document.createElement("label");
@@ -430,10 +430,20 @@ function _getMap(geo, type = '') {
  * 
  * @param {String} localwithzone - a timestamp that contains a timezone offset
  */
-function _getUTC(localwithzone) {
-  if (!localwithzone || !localwithzone.match(/[\-\+]/)) return localwithzone;
-  const utcmom = moment.utc(localwithzone, "YYYY:MM:DD HH:mm:SSZ");
-  return utcmom.format("YYYY:MM:DD HH:mm:SS");
+function _getUTC(localdatetime, zonestring = '') {
+  if (!localdatetime) {
+    console.warn('No datetime provided for UTC conversion');
+    return '0000:00:00 00:00:00Z';
+  } else if (localdatetime.match(/[\-\+]/)) {
+    const utcmom = moment.utc(localdatetime, "YYYY:MM:DD HH:mm:SSZ");
+    return utcmom.format("YYYY:MM:DD HH:mm:SS\Z");
+  } else if (zonestring) {
+    const locmom = moment.tz(localdatetime, "YYYY:MM:DD HH:mm:SS", zonestring);
+    return locmom.utc().format("YYYY:MM:DD HH:mm:SS\Z");
+  } else {
+    console.warn('No timezone provided for UTC conversion');
+    return localdatetime;
+  }
 }
 
 /**
@@ -463,7 +473,9 @@ function _getNewStubPlusExt(fieldVal) {
   const givenStub = fieldVal.match(/^\d{8}_\d{6}/)
                   ? fieldVal.substring(16, fieldVal.length - extVal.length)
                   : fieldVal.substring(0, fieldVal.length - extVal.length);
-  return imgStub.value ? `${imgStub.value}${extVal}` : `${givenStub}${extVal}`;
+  return imgStub.value
+       ? `${imgStub.value.replace(/[^\w]/g,'-')}${extVal}`
+       : `${givenStub.replace(/[^\w]/g,'-')}${extVal}`;
 }
 
 /**
@@ -478,6 +490,21 @@ function _replaceName(fieldId, field) {
     return 'NO-DATE-SELECTED';
   }
   return `${dateVal}_${_getNewStubPlusExt(field.value)}`;
+}
+
+/**
+ * Just a li'l lookup table reused by the individual and global
+ * Apply button handlers.
+ */
+function _updatableValues() {
+  const utcdatetime = imgDatetime.value ? _getUTC(imgDatetime.value, formTimezone.value) : '';
+  return {
+    Title: imgTitle.value,
+    Coords: formLocation.value,
+    EditorDateTime: imgDatetime.value,
+    GPSDateStamp: utcdatetime.length >= 19 ? utcdatetime.substring(0, 10) : '',
+    GPSTimeStamp: utcdatetime.length >= 19 ? utcdatetime.substring(11, 19) : ''
+  }
 }
 
 /**
@@ -575,24 +602,16 @@ function initExifListControls() {
   });
   // Apply buttons - for user to apply the global editor's value to the field.
   // The Name is special because it involves determining both the date and the stub
-  // TODO - maybe make a fn(), since also done by the global **Apply** button.
   const applybtns = document.querySelectorAll('.btnapply');
   applybtns.forEach( btn => {
     btn.addEventListener('click', function() {
       const field = document.getElementById(btn.id.substring(9)); // e.g. item-3_Name
       const fieldParts = btn.id.split('_'); // e.g. btnapply_item-3_Name
-      switch (fieldParts[2]) {
-        case 'Name':
-          field.value = _replaceName(fieldParts[1], field);
-          break;
-        case 'Title':
-          field.value = imgTitle.value;
-          break;
-        case 'Coords':
-          field.value = imgLocation.value;
-          break;
-        default:
-          return;
+      if (fieldParts[2] === 'Name') {
+        field.value = _replaceName(fieldParts[1], field);
+      } else {
+        const values = _updatableValues();
+        field.value = values[fieldParts[2]];  
       }
       _indicateIfModified(field);
     });
@@ -633,33 +652,20 @@ function initExifListControls() {
  * _change indicator_ to more easily scan what's what.
  * 
  * We'll see.. when I start using this _in production_.
- * 
- * TODO: Maybe abstract out into a fn() what's done here and what's done in the
- * individual exifList field **Apply** buttons.
  */
 function applyReplacements() {
-  // make sure defaults are set
-  if(![imgStub, imgTitle, imgDatetime].every(f => f.value)) {
-    alert("Missing value for stub, title, or date.");
-    return;
-  }
-  // get utctime
-  const utctime = imgDatetime.value
-                ? _getUTC(imgDatetime.value+imgTimezone.value)
-                : '';
-  editorDatetime.value = utctime;
   // set appropriate values and indicate changed
   exifList.childNodes.forEach( li => {
-    [ ['Title', imgTitle.value],
-      ['Coords', imgLocation.value],
-      ['EditorDateTime', editorDatetime.value] ].forEach ( entry => {
-      const inputField = li.querySelector(`#${li.id}_${entry[0]}`);
-      inputField.value = entry[1];
-      if (entry[0] === 'EditorDateTime') {
-        const td = li.querySelector(`#${li.id}_eDateVal`);
-        td.textContent = entry[1];
+    Object.entries(_updatableValues()).forEach( ([key, value]) =>{
+      const inputField = li.querySelector(`#${li.id}_${key}`);
+      if (value) {
+        inputField.value = value;
+        if (key === 'EditorDateTime') {
+          const td = li.querySelector(`#${li.id}_eDateVal`);
+          td.textContent = value;
+        }
+        _indicateIfModified(inputField);
       }
-      _indicateIfModified(inputField);
     });
     nameField = li.querySelector(`#${li.id}_Name`);
     nameField.value = _replaceName(li.id, nameField);
