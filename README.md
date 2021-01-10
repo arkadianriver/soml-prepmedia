@@ -1,4 +1,3 @@
-[![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 
 # soml-prepmedia
 
@@ -29,9 +28,9 @@ it's nice to also be sortable and searchable by file name.
 - Hopefully soml will have a way to map the data geographically.
 - As for comments, the idea is for soml itself to log the event details,
 but in case soml is lost, at least the names and events will be captured
-in the media comments.
+in the media Title fields.
 
-## Usage
+## Using this thing
 
 I started to use a CLI, but didn't feel I had enough control, particularly in
 choosing which date to use while handling a batch of files. I thus created a
@@ -39,15 +38,23 @@ web app instead.
 
 ### Web application
 
-**WORK IN PROGRESS**: Almost finished. (I hope)
-Currently reads, displays, and allows edits to data.
-One final edit of the filename with date and we can send to the perl server to do its thing.
+**Installation:**
 
-**Dependencies:**
+Install
+[Perl]() and
+[ImageMagick]().
 
-- Perl modules: Image::ExifTool, MIME::Base64, Mojolicious (I used `cpan install Mojolicious`)
-- ImageMagick CLI
-- Some CDN pulls: flatpickr, momentjs, moment-timezone, axios
+With CPAN, install some Perl modules, including Mojolicious and some plugins:
+
+```
+cpan
+install Image::Exiftool
+install MIME::Base64
+install Mojolicious
+install Mojolicious::Plugin::JSONConfig
+install Mojolicious::Plugin::StaticCache
+quit
+```
 
 **Procedure:**
 

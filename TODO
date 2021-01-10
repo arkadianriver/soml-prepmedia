@@ -11,13 +11,13 @@
 ☐ maybe add link to images (maybe push/pop static paths if dynamic)
 ✔ add spinner while waiting for exifdata to load @done(20-12-29 05:11)
 ✔ Apply button to apply replacements to all values and _indicateIfModified() @done(20-12-29 23:05)
-☐ Get timezone logic correctly handled (Find TODOs in code) based on Samsung and Windows handling
-☐ finish up apply button with names (and _indicateIfModified)
-☐ have confirm send to perl to ultimately run exiftool
-☐ document JSON interface to server.pl and properly execute exiftool ...
-☐ ... with dupe file renaming logic (see CLI)
-☐ leave exifList DOM until we know all is okay, and return value is hmm..
-  - new exiftool read of same files displayed as JSON only in modal?
-  - ..displayed as exifList all grayed out unchecked?
-  - send only response message as okay or error, and if all okay, clear the exifList?
+✔ Get timezone logic correctly handled (Find TODOs in code) based on Samsung and Windows handling @done(21-01-09 23:16)
+✔ finish up apply button with names (and _indicateIfModified) @done(21-01-09 23:16)
+✔ have confirm send to perl to ultimately run exiftool @done(21-01-09 23:16)
+✔ document JSON interface to server.pl and properly execute exiftool ... @done(21-01-09 23:17)
+✔ ... with dupe file renaming logic (see CLI) @done(21-01-09 23:17)
+✔ leave exifList DOM until we know all is okay, and return value is hmm.. @done(21-01-09 23:18)
+  - ~new exiftool read of same files displayed as JSON only in modal?~
+  - ~..displayed as exifList all grayed out unchecked?~
+  - send only response message as okay or error ~and if all okay, clear the exifList?~
 ☐ Possibly reconsider writing default replacements to config depending on workflow.

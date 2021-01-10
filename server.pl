@@ -26,8 +26,6 @@ my $debug = 1;
 
 use File::Copy;
 use File::Basename;
-use Data::Dumper;
-#use JSON;
 use Image::ExifTool qw( :Public );
 use MIME::Base64;
 use Mojolicious::Lite -signatures;
@@ -45,7 +43,6 @@ open F, "config.json" or die "Cannot open config. $!";
   $config_json =~ s/\s+/ /g;
 }
 close F;
-#my $config = decode_json $config_json;
 my $config = plugin JSONConfig => { file => 'config.json' };
 
 
