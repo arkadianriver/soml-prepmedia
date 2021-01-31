@@ -451,11 +451,15 @@ function _getUTC(localdatetime, zonestring = '') {
  * 
  * @param {String} id - list item identifier
  */
-function _getSelectedDate(id) {
+function _getSelectedDate(id, format) {
   const dateAsExif = mainForm.elements[`${id}_dates`].value.substring(0, 19);
-  return dateAsExif
-       ? moment(dateAsExif, "YYYY:MM:DD HH:mm:SS").format("YYYYMMDD_HHmmSS")
-       : '';
+  if (format === 'fileformat') {
+    return dateAsExif
+         ? moment(dateAsExif, "YYYY:MM:DD HH:mm:SS").format("YYYYMMDD_HHmmSS")
+         : '';
+  } else {
+    return dateAsExif;
+  }
 }
 
 /**
@@ -495,6 +499,24 @@ function _replaceName(fieldId, field) {
 }
 
 /**
+ * Constructs a GPSDateStamp or GPSTimeStamp from the selected date
+ * 
+ * @param {String} fieldId Id of the input field
+ * @param {String} fieldName Name of the input field
+ */
+function _replaceGPS(fieldId, fieldName) {
+  const dateVal = _getSelectedDate(fieldId);
+  const utcdatetime = dateVal ? _getUTC(dateVal, formTimezone.value) : '';
+  if (!utcdatetime) {
+    return 'NO-DATE-SELECTED';
+  } else {
+    return fieldName === 'GPSDateStamp'
+         ? utcdatetime.substring(0, 10)
+         : utcdatetime.substring(11, 19);
+  }
+}
+
+/**
  * Just a li'l lookup table reused by the individual and global
  * Apply button handlers.
  */
@@ -503,9 +525,7 @@ function _updatableValues() {
   return {
     Title: imgTitle.value,
     Coords: formLocation.value,
-    EditorDateTime: imgDatetime.value,
-    GPSDateStamp: utcdatetime.length >= 19 ? utcdatetime.substring(0, 10) : '',
-    GPSTimeStamp: utcdatetime.length >= 19 ? utcdatetime.substring(11, 19) : ''
+    EditorDateTime: imgDatetime.value
   }
 }
 
@@ -609,11 +629,17 @@ function initExifListControls() {
     btn.addEventListener('click', function() {
       const field = document.getElementById(btn.id.substring(9)); // e.g. item-3_Name
       const fieldParts = btn.id.split('_'); // e.g. btnapply_item-3_Name
-      if (fieldParts[2] === 'Name') {
-        field.value = _replaceName(fieldParts[1], field);
-      } else {
-        const values = _updatableValues();
-        field.value = values[fieldParts[2]];  
+      switch (fieldParts[2]) {
+        case 'Name':
+          field.value = _replaceName(fieldParts[1], field);
+          break;
+        case 'GPSDateStamp':
+        case 'GPSTimeStamp':
+          field.value = _replaceGPS(fieldParts[1], fieldParts[2]);
+          break;
+        default:  
+          const values = _updatableValues();
+          field.value = values[fieldParts[2]];  
       }
       _indicateIfModified(field);
     });
@@ -671,6 +697,10 @@ function applyReplacements() {
     });
     nameField = li.querySelector(`#${li.id}_Name`);
     nameField.value = _replaceName(li.id, nameField);
+    ['GPSDateStamp', 'GPSTimeStamp'].forEach( s => {
+      gpsField = li.querySelector(`#${li.id}_${s}`);
+      gpsField.value = _replaceGPS(li.id, s);
+    });
   _indicateIfModified(nameField);
   });
 }
@@ -720,6 +750,7 @@ function onSubmit(event) {
     path: filePath,
     media: data.filter( e => e.enable )
   }
+  confirmBtn.disabled = false;
   dataField.textContent = JSON.stringify(constoutdata, null, 2);
   dataDialog.showModal();
 }

@@ -59,8 +59,20 @@ quit
 **Procedure:**
 
 1. Run `server.pl` and open `http://localhost:8989` in a browser.
-   Also open a file explorer conveniently next to the app.
    Size the browser so there's plenty of room in the EXIF data area.
+   Next to the app, open a file explorer window with the files you want to work on.
+
+   **Note:** The app sets filenames based on EXIF data,
+   but it doesn't parse filenames to see if they contain datetime data to choose from.
+   If you are working on files that have already captured the timestamps in the filename
+   (and you'll want to use those timestamps),
+   run `exiftool` on the files beforehand to capture that date and time in the EXIF data
+   so that the tool can make use of it. Both images and videos have DateTimeOriginal,
+   so let's use that.
+
+   ```
+   exiftool "-datetimeoriginal<filename" -overwrite_original *.mp4
+   ```
 
 1. Choose a batch of files belonging to a common event and apply a set of common values
    to the files.
@@ -75,11 +87,6 @@ quit
 1. In the EXIF data area, select the date you want to use, change, revert, reapply,
    or otherwise tweak all the data fields to how you want them.
    Get everything displayed how you want it because what is shown is what will be sent to the server.
-
-   **NOTE:** I haven't yet decided how to store the dates.
-   I plan to store them as UTC since EXIF doesn't store timezone with timestamp,
-   but turns out my camera stamps things with the local timestamp.
-   I'm not sure I want to rewrite every file my camera records. hmm ....
 
 1. Click **Submit**, which writes the JSON request to be sent to the server and displays it.
 
