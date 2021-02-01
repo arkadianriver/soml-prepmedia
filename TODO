@@ -25,3 +25,5 @@
   - Seems CreateDate is UTC for vidz, local for picz?
 ✔ bug: fileStub to exclude img increment number @done(21-01-10 01:40)
 ✔ disable confirm button after submitted; add window close ([x]) button @done(21-01-10 02:19)
+☐ check filename for date to choose. If format provided (in global apply), use that;
+   - otherwise, translate Phil Harvey's InverseDateTime() to JavaScript and use
