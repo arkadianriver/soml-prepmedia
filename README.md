@@ -32,7 +32,7 @@ There are standards emerging on how to represent estimated dates,
 but we're not there yet.
 Since I'd like the ordering to remain somewhat consistent,
 I'm hoping the following standard will work for my stuff.
-Have a folder for each year and a decades folder for unsure stuff (e.g. ..., `1978`, '1979`, `1970s`)
+Have a folder for each year and a decades folder for unsure stuff (e.g. ..., `1978`, `1979`, `1970s`)
 
 | Filename format | EXIF time | Description |
 |---|---|---|
