@@ -56,8 +56,8 @@ web app instead.
 **Installation:**
 
 Install
-[Perl]() and
-[ImageMagick]().
+[Perl](https://www.perl.org/get.html) (Recommend Strawberry for Windows) and
+[ImageMagick](https://imagemagick.org/script/download.php).
 
 With CPAN, install some Perl modules, including Mojolicious and some plugins:
 
