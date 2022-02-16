@@ -40,8 +40,8 @@ Have a folder for each year and a decades folder for unsure stuff (e.g. ..., `19
 | `YYYYmmDD_000000_desc` | 200000 GMT | exact date known (not time) - midnight PST will be 8 p.m. GMT |
 | `YYYYmm00_mmm_desc` | 200000 GMT | exact month known e.g. `19860900_Sep_21st-birthday-party` |
 | `YYYY{02,05,08,11}00_NQ_desc` | 200000 GMT | exact season known e.g. `19860500_2Q_first-communion` |
-| `YYYY{03,09}00_{1H,2H}_desc` | 200000 GMT | first or second half of year known e.g. `19860900_2H_sophmore-first-semester` |
-| `YYYY0000_YR_desc` | 200000 GMT | exact year known only e.g. `19860000_YR_sophmore-college` |
+| `YYYY{03,09}00_{1H,2H}_desc` | 200000 GMT | first or second half of year known e.g. `19860900_2H_sophomore-first-semester` |
+| `YYYY0000_YR_desc` | 200000 GMT | exact year known only e.g. `19860000_YR_sophomore-college` |
 | `YYY0s_desc` | 200000 GMT | rough decade known (put in separate decade folder e.g. 1970s) |
 
 
