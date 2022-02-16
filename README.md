@@ -1,34 +1,49 @@
 
 # soml-prepmedia
 
-Sets metadata about media (movie, pic) files, by using [Exiftool](https://exiftool.org).
+A web interface to make it a bit easier to set metadata about media (movie, pic) files.
+It uses [Exiftool](https://exiftool.org) on the back end.
 (Actually, exiftool works on all kinds of files, but media is what I'm interested in.)
 
 ![web app ui](readme.png)
 
 ## Purpose
 
-To be used for cataloging Story of My Life (soml) media.
+To be used for cataloging Story of My Life (SoML) media.
 
-Soml will _most likely_ be a blog of events,
-where each event page will have two API calls.
+SoML will basically be a blog of events, where the date of the media available
+is pulled into the blog article with the same date.
+Because I haven't yet found a good API for exactly how that will work,
+I'm capturing as much important information as possible in this web interface:
 
-1. A call to the media server to return all media where
-   the date falls between the date range of the event.
-1. A call to a map server to map the geographic location
-   of each media file
-   (and kml files in the blog, if provided, for paths, areas, and other map details).
+- Files named as local `{{date}}_{{time}}` followed by a brief description
+- EXIF GMT "datetime original",
+  by selecting from various options that the file might already have stored based on your camera
+- EXIF title, for extended descriptive information
+- EXIF location information;
+  to use the little map displayed with the **show** button (not required),
+  you'll need a paid Google account
 
-Because I haven't yet determined exactly how soml will work,
-we're capturing as much important information as possible:
+### Example file naming convention
 
-- Some photo applications can index images by EXIF data,
-yet for better archiving and simpler implementation,
-it's nice to also be sortable and searchable by file name.
-- Hopefully soml will have a way to map the data geographically.
-- As for comments, the idea is for soml itself to log the event details,
-but in case soml is lost, at least the names and events will be captured
-in the media Title fields.
+I'm using this to catalog images before this century,
+which means I won't always know the exact date and time.
+There are standards emerging on how to represent estimated dates,
+but we're not there yet.
+Since I'd like the ordering to remain somewhat consistent,
+I'm hoping the following standard will work for my stuff.
+Have a folder for each year and a decades folder for unsure stuff (e.g. ..., `1978`, '1979`, `1970s`)
+
+| Filename format | EXIF time | Description |
+|---|---|---|
+| `YYYYmmDD_HHMMSS_desc` | HHMMSS+zone | exact date and time known |
+| `YYYYmmDD_000000_desc` | 200000 GMT | exact date known (not time) - midnight PST will be 8 p.m. GMT |
+| `YYYYmm00_mmm_desc` | 200000 GMT | exact month known e.g. `19860900_Sep_21st-birthday-party` |
+| `YYYY{02,05,08,11}00_NQ_desc` | 200000 GMT | exact season known e.g. `19860500_2Q_first-communion` |
+| `YYYY{03,09}00_{1H,2H}_desc` | 200000 GMT | first or second half of year known e.g. `19860900_2H_sophmore-first-semester` |
+| `YYYY0000_YR_desc` | 200000 GMT | exact year known only e.g. `19860000_YR_sophmore-college` |
+| `YYY0s_desc` | 200000 GMT | rough decade known (put in separate decade folder e.g. 1970s) |
+
 
 ## Using this thing
 
@@ -66,13 +81,15 @@ quit
    but it doesn't parse filenames to see if they contain datetime data to choose from.
    If you are working on files that have already captured the timestamps in the filename
    (and you'll want to use those timestamps),
-   run `exiftool` on the files beforehand to capture that date and time in the EXIF data
-   so that the tool can make use of it. Both images and videos have DateTimeOriginal,
+   I'm running the Windows `exiftool.exe` on the files beforehand to capture that date and time in the EXIF data
+   so that the web app can make use of it. Both images and videos have DateTimeOriginal,
    so let's use that.
-
+   
    ```
    exiftool "-datetimeoriginal<filename" -overwrite_original *.mp4
    ```
+   
+   (If you're on Mac or Linux and need another way to do this, lemme know.)
 
 1. Choose a batch of files belonging to a common event and apply a set of common values
    to the files.
@@ -93,7 +110,10 @@ quit
 1. Review the details and click **Confirm and write to files** or cancel
    (and keep tweaking or whatever).
 
-### Old CLI
+## Old CLI (Don't use)
+
+It's here, but I'd recommend NOT using `cli-prepmedia.pl`.
+I haven't updated it in a while and don't know exactly what EXIF fields it sets.
 
 **Dependencies:**
 
@@ -144,5 +164,5 @@ Writing samples\IMAG0102.jpg to samples\picz\20190303_185248_DinnerParty.jpg..
 
 ## Notes
 
-- Tested on Windows 10 only
+- Tested on Windows 10, but should work on Mac and Linux.
 - See TODO file and TODO comments in source
