@@ -20,7 +20,6 @@ h2 {
 }
 
 form {
-  height: 860px;
   display: flex;
   flex-flow: row nowrap;
   justify-content: center;
@@ -148,7 +147,7 @@ button#usedefault {
 }
 
 #exiflist {
-  height: 680px;
+  height: 80vh;
   overflow: auto;
 }
 

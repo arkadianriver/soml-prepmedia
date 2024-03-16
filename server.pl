@@ -145,6 +145,7 @@ sub getExifInfo
     my $img64 = getThumb64($_);
     my ($path, $base, $ext) = getFileParts($_);
     my $i = {};
+    $i->{'FileName'} = $info->{'FileName'};
     $i->{'thumb'} = $img64;
     $i->{'Name'} = ${base}.$ext;
     $i->{'Title'} = $info->{'Title'} ? $info->{'Title'} : '';
@@ -299,6 +300,7 @@ __DATA__
     <script src="app.js" defer></script>
   </head>
   <body>
+    <div id="container">
     <header>
       <div><b>soml-prepmedia</b></div>
     </header>
@@ -358,6 +360,7 @@ __DATA__
       <div>Organizing SOML media with ease</div>
       <div>Oy!</div>
     </footer>
+    </div>
     <dialog id="dataDialog">
       <pre id="dataField"></pre>
       <form method="dialog">
