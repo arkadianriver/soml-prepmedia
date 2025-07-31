@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 #
 # Sets metadata about media (movie, pic) files, by using Exiftool.
 # (Actually, exiftool works on all kinds of files, but media is what I'm interested in.)
@@ -29,7 +29,7 @@ use File::Basename;
 use Image::ExifTool qw( :Public );
 use MIME::Base64;
 use Mojolicious::Lite -signatures;
-use DateTime::TimeZone;
+use POSIX;
 
 
 # ---------------------------------------------------
@@ -62,7 +62,7 @@ get '/' => sub ($c) {
   # main app
   # (adds config as JSON to the HTML page for access by client)
   $c->stash(config_json => $config_json);
-  $c->stash(timezone => DateTime::TimeZone->new( name => 'local' )->name());
+  $c->stash(timezone => strftime("%Z", localtime()));
   $c->render(template => 'index');
 };
 
@@ -91,7 +91,8 @@ post '/changefiles' => sub ($c) {
 
 # launch
 
-app->start('threaded', '-l', 'http://localhost:8989');
+#app->start('threaded', '-l', 'http://localhost:8989');
+app->start('daemon', '-l', 'http://localhost:8989');
 
 
 # ---------------
