@@ -333,7 +333,10 @@ async function makeExifDOM(flist) {
  * @param {Array} flist - the list of files obtained from the file pad drop
  */
 function serverGetExif(flist) {
-  const data = flist.map( a => `${filePath}\\${a}`);
+  const regex = /[\\\/]/;
+  const fsep = filePath.match(regex)[0]
+  const trail_fsep = filePath[filePath.length - 1] === fsep ? '' : fsep
+  const data = flist.map( a => `${filePath}${trail_fsep}${a}`);
   return axios.post('http://localhost:8989/getexif', data)
   .then(function (response) {
     return response.data;
@@ -351,7 +354,9 @@ function serverGetExif(flist) {
  * @param {String} file - file to test (first file in flist array)
  */
 function serverPathMismatch(path, file) {
-  path += path.substr(-1).match(/[\\\/]/) ? '' : '\\';
+  const regex = /[\\\/]/;
+  const fsep = path.match(regex)[0]
+  path += path[path - 1] === fsep ? '' : fsep;
   const joined = path+file;
   const data = `${joined}`;
   return axios.post('http://localhost:8989/fileexist', data, {

@@ -1,29 +1,36 @@
-✔ add thumbnails @done(20-12-22 01:43)
-✔ store previous path and editor values (nm, use autocomplete for browser to handle) @done(20-12-27 11:13)
-✔ radio choose which date to use in each, with 'selected' being, in order: @done(20-12-27 09:12)
-✔ group dates, order all exif entries @done(20-12-21 20:05)
-✔ reset button to replace value with title on click @done(20-12-28 21:08)
-✔ use one [x] in EXIF files list (and id) to mark to remove from list @done(20-12-28 16:08)
-✔ convert exifList to JSON @done(20-12-29 17:17)
-✔ use config.json in both JS and perl instead of two configs @done(20-12-22 02:57)
-✔ sort exif display by name @done(20-12-26 10:44)
-✔ why some images broken, thumb b64 data seems ok (needed binmode) @done(20-12-26 22:03)
+☐ Maybe change drag and drop behavior to simple multi-file selection window with full paths
 ☐ maybe add link to images (maybe push/pop static paths if dynamic)
-✔ add spinner while waiting for exifdata to load @done(20-12-29 05:11)
-✔ Apply button to apply replacements to all values and _indicateIfModified() @done(20-12-29 23:05)
-✔ Get timezone logic correctly handled (Find TODOs in code) based on Samsung and Windows handling @done(21-01-09 23:16)
-✔ finish up apply button with names (and _indicateIfModified) @done(21-01-09 23:16)
-✔ have confirm send to perl to ultimately run exiftool @done(21-01-09 23:16)
-✔ document JSON interface to server.pl and properly execute exiftool ... @done(21-01-09 23:17)
-✔ ... with dupe file renaming logic (see CLI) @done(21-01-09 23:17)
-✔ leave exifList DOM until we know all is okay, and return value is hmm.. @done(21-01-09 23:18)
   - ~new exiftool read of same files displayed as JSON only in modal?~
   - ~..displayed as exifList all grayed out unchecked?~
   - send only response message as okay or error ~and if all okay, clear the exifList?~
 ☐ Possibly reconsider writing default replacements to config depending on workflow.
-✔ Video: find what Windows reads for MediaCreated date for video: @done(21-01-10 01:41)
   - Seems CreateDate is UTC for vidz, local for picz?
-✔ bug: fileStub to exclude img increment number @done(21-01-10 01:40)
-✔ disable confirm button after submitted; add window close ([x]) button @done(21-01-10 02:19)
 ☐ check filename for date to choose. If format provided (in global apply), use that;
    - otherwise, translate Phil Harvey's InverseDateTime() to JavaScript and use
+
+Archive:
+  ✔ Trailing forward slash errantly required for files to copy over @done(2025-08-23 23:11)
+  ✔ Errant backslash shows up in filename @done(2025-08-23 22:48)
+  ✔ (was backslash all along) no datetime or location (exif) info retrieved at all @done(2025-08-23 22:48)
+  ✔ Local timezone not working on Linux @done(25-07-31 21:18)
+  ✔ add thumbnails @done(20-12-22 01:43)
+  ✔ store previous path and editor values (nm, use autocomplete for browser to handle) @done(20-12-27 11:13)
+  ✔ radio choose which date to use in each, with 'selected' being, in order: @done(20-12-27 09:12)
+  ✔ group dates, order all exif entries @done(20-12-21 20:05)
+  ✔ reset button to replace value with title on click @done(20-12-28 21:08)
+  ✔ use one [x] in EXIF files list (and id) to mark to remove from list @done(20-12-28 16:08)
+  ✔ convert exifList to JSON @done(20-12-29 17:17)
+  ✔ use config.json in both JS and perl instead of two configs @done(20-12-22 02:57)
+  ✔ sort exif display by name @done(20-12-26 10:44)
+  ✔ why some images broken, thumb b64 data seems ok (needed binmode) @done(20-12-26 22:03)
+  ✔ add spinner while waiting for exifdata to load @done(20-12-29 05:11)
+  ✔ Apply button to apply replacements to all values and _indicateIfModified() @done(20-12-29 23:05)
+  ✔ Get timezone logic correctly handled (Find TODOs in code) based on Samsung and Windows handling @done(21-01-09 23:16)
+  ✔ finish up apply button with names (and _indicateIfModified) @done(21-01-09 23:16)
+  ✔ have confirm send to perl to ultimately run exiftool @done(21-01-09 23:16)
+  ✔ document JSON interface to server.pl and properly execute exiftool ... @done(21-01-09 23:17)
+  ✔ ... with dupe file renaming logic (see CLI) @done(21-01-09 23:17)
+  ✔ leave exifList DOM until we know all is okay, and return value is hmm.. @done(21-01-09 23:18)
+  ✔ Video: find what Windows reads for MediaCreated date for video: @done(21-01-10 01:41)
+  ✔ bug: fileStub to exclude img increment number @done(21-01-10 01:40)
+  ✔ disable confirm button after submitted; add window close ([x]) button @done(21-01-10 02:19)

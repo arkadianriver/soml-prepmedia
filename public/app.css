@@ -6,7 +6,13 @@ body {
   background: #c0c0c0;
   font-size: 1.1rem;
   color:rgba(0, 0, 0, 0.8);
-  overflow-y: hidden;
+  /* overflow-y: hidden; */
+}
+
+#container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 h1 {
@@ -41,10 +47,12 @@ fieldset {
 
 #exifbox {
   width: 54rem;
+  max-height: 73vh;
 }
 
 #maincanvas {
   width: 35rem;
+  max-height: 73vh;
 }
 
 header, footer {
@@ -147,8 +155,7 @@ button#usedefault {
 }
 
 #exiflist {
-  height: 80vh;
-  overflow: auto;
+  overflow-y: auto;
 }
 
 #exiflist > li, #filelist > li{
