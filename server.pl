@@ -91,6 +91,7 @@ post '/changefiles' => sub ($c) {
 
 # launch
 
+app->secrets([$config->{'mojo_passphrase'}]);
 #app->start('threaded', '-l', 'http://localhost:8989');
 app->start('daemon', '-l', 'http://localhost:8989');
 
@@ -305,7 +306,6 @@ __DATA__
     <header>
       <div><b>soml-prepmedia</b></div>
     </header>
-    <main>
     <form id="mainform" autocomplete="on"
           action="javascript:void(0);"
           enctype="application/json">
@@ -356,7 +356,6 @@ __DATA__
         </div>
       </section>
     </form>
-    </main>
     <footer>
       <div>Organizing SOML media with ease</div>
       <div>Oy!</div>
