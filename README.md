@@ -37,6 +37,8 @@ quit
 
 ## Using the thing
 
+1. Copy `config-template.json` to `config.json` and change the paths and Google API key as appropriate.
+
 1. Run `server.pl` and open `http://localhost:8989` in a browser.
    Size the browser so there's plenty of room in the EXIF data area.
    Next to the app, open a file explorer window with the files you want to work on.
