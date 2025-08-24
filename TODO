@@ -1,4 +1,3 @@
-☐ Trailing forward slash errantly required for files to copy over
 ☐ Maybe change drag and drop behavior to simple multi-file selection window with full paths
 ☐ maybe add link to images (maybe push/pop static paths if dynamic)
   - ~new exiftool read of same files displayed as JSON only in modal?~
@@ -10,6 +9,7 @@
    - otherwise, translate Phil Harvey's InverseDateTime() to JavaScript and use
 
 Archive:
+  ✔ Trailing forward slash errantly required for files to copy over @done(2025-08-23 23:11)
   ✔ Errant backslash shows up in filename @done(2025-08-23 22:48)
   ✔ (was backslash all along) no datetime or location (exif) info retrieved at all @done(2025-08-23 22:48)
   ✔ Local timezone not working on Linux @done(25-07-31 21:18)

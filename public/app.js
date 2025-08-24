@@ -354,7 +354,9 @@ function serverGetExif(flist) {
  * @param {String} file - file to test (first file in flist array)
  */
 function serverPathMismatch(path, file) {
-  path += path.substr(-1).match(/[\\\/]/) ? '' : '\\';
+  const regex = /[\\\/]/;
+  const fsep = path.match(regex)[0]
+  path += path[path - 1] === fsep ? '' : fsep;
   const joined = path+file;
   const data = `${joined}`;
   return axios.post('http://localhost:8989/fileexist', data, {
